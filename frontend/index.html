@@ -3,16 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KubeTasks</title>
+    <title>Task Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #task-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .task {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+    </style>
 </head>
 <body>
-    <h1>KubeTasks - Task Manager</h1>
-    <form id="taskForm">
-        <input type="text" id="taskTitle" placeholder="Enter task title" required>
+    <h1>Task Manager</h1>
+    <form id="task-form">
+        <input type="text" id="task-input" placeholder="Add a task" required>
         <button type="submit">Add Task</button>
     </form>
-    <ul id="taskList"></ul>
+    <ul id="task-list"></ul>
 
-    <script src="script.js"></script>
+    <script>
+        const apiUrl = "http://localhost:5001/tasks";
+
+        const taskForm = document.getElementById("task-form");
+        const taskInput = document.getElementById("task-input");
+        const taskList = document.getElementById("task-list");
+
+        async function fetchTasks() {
+            const response = await fetch(apiUrl);
+            const tasks = await response.json();
+            taskList.innerHTML = "";
+            tasks.forEach(task => {
+                const li = document.createElement("li");
+                li.className = "task";
+                li.innerHTML = `
+                    <span>${task.title} ${task.completed ? "(Completed)" : ""}</span>
+                    <button onclick="deleteTask(${task.id})">Delete</button>
+                `;
+                taskList.appendChild(li);
+            });
+        }
+
+        async function addTask(title) {
+            await fetch(apiUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title }),
+            });
+            fetchTasks();
+        }
+
+        async function deleteTask(id) {
+            await fetch(`${apiUrl}/${id}`, {
+                method: "DELETE",
+            });
+            fetchTasks();
+        }
+
+        taskForm.addEventListener("submit", e => {
+            e.preventDefault();
+            const title = taskInput.value.trim();
+            if (title) {
+                addTask(title);
+                taskInput.value = "";
+            }
+        });
+
+        fetchTasks();
+    </script>
 </body>
 </html>

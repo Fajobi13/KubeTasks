@@ -1,25 +1,27 @@
-FROM nginx:alpine
+# backend/Dockerfile
 
-# Add a non-root user and group
-RUN addgroup -S frontendgroup && adduser -S frontenduser -G frontendgroup
+FROM python:3.9-slim
 
-# Create necessary directories and set ownership for the non-root user
-RUN mkdir -p /var/cache/nginx/client_temp && \
-    chown -R frontenduser:frontendgroup /var/cache/nginx
+# Create a non-root user
+RUN useradd -ms /bin/bash flaskuser
 
-# Copy the custom Nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+# Set the working directory
+WORKDIR /app
 
-# Copy static HTML files to Nginx's default directory
-COPY . /usr/share/nginx/html
+# Copy the backend code
+COPY . /app
 
-# Set ownership of the HTML files for the non-root user
-RUN chown -R frontenduser:frontendgroup /usr/share/nginx/html
+# Install dependencies
+RUN pip install flask flask-cors
+
+# Change ownership of the working directory
+RUN chown -R flaskuser:flaskuser /app
 
 # Switch to the non-root user
-USER frontenduser
+USER flaskuser
 
-# Expose the default Nginx port
-EXPOSE 80
+# Expose port 5000
+EXPOSE 5000
 
-CMD ["nginx", "-g", "daemon off;"]
+# Command to run the application
+CMD ["python", "app.py"]
