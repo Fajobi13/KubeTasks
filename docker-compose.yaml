@@ -1,11 +1,24 @@
 services:
   backend:
-    build: ./backend
+    image: fajobi13/kubetasks-backend:latest
     ports:
-      - "5001:5000"  # Map to port 5001 instead of 5000
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+    networks:
+      - kubetasks-network
+
   frontend:
-    build: ./frontend
+    image: fajobi13/kubetasks-frontend:latest
     ports:
-      - "3001:3000"  # Avoid conflicts with port 3000
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_BASE_URL=http://backend:5000
     depends_on:
       - backend
+    networks:
+      - kubetasks-network
+
+networks:
+  kubetasks-network:
+    driver: bridge
