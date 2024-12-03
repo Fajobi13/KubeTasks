@@ -1,51 +1,66 @@
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-import os
+from sqlalchemy import create_engine, Column, Integer, String, Boolean
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-app = Flask(__name__, static_folder="../frontend/build", static_url_path="")
-CORS(app)  # Enable Cross-Origin Resource Sharing
+app = Flask(__name__)
+CORS(app)
 
-# In-memory storage for tasks
-tasks = []
+# Database setup
+DATABASE_URL = "postgresql://postgres:password@db:5432/todos"
+engine = create_engine(DATABASE_URL)
+Base = declarative_base()
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-@app.route("/")
-def serve():
-    return send_from_directory(app.static_folder, "index.html")
+# Todo model
+class Todo(Base):
+    __tablename__ = "todo"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    completed = Column(Boolean, default=False)
 
-@app.route("/<path:path>")
-def static_proxy(path):
-    file_path = os.path.join(app.static_folder, path)
-    if os.path.isfile(file_path):
-        return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, "index.html")
+Base.metadata.create_all(bind=engine)
 
+# Routes
 @app.route("/api/todos", methods=["GET"])
 def get_todos():
-    return jsonify(tasks)
+    session = SessionLocal()
+    todos = session.query(Todo).all()
+    session.close()
+    return jsonify([{"id": t.id, "title": t.title, "completed": t.completed} for t in todos])
 
 @app.route("/api/todos", methods=["POST"])
 def add_todo():
-    try:
-        data = request.json
-        task = {"id": len(tasks) + 1, "title": data["title"], "completed": False}
-        tasks.append(task)
-        return jsonify(task), 201
-    except Exception as e:
-        print(f"Error in POST /api/todos: {e}")
-        return jsonify({"error": "Failed to add task"}), 500
+    session = SessionLocal()
+    data = request.json
+    todo = Todo(title=data["title"])
+    session.add(todo)
+    session.commit()
+    session.refresh(todo)
+    return jsonify({"id": todo.id, "title": todo.title, "completed": todo.completed}), 201
 
-@app.route("/api/todos/<int:task_id>", methods=["PUT"])
-def update_todo(task_id):
-    for task in tasks:
-        if task["id"] == task_id:
-            task["completed"] = request.json.get("completed", task["completed"])
-            return jsonify(task)
-    return jsonify({"error": "Task not found"}), 404
+@app.route("/api/todos/<int:todo_id>", methods=["PUT"])
+def update_todo(todo_id):
+    session = SessionLocal()
+    todo = session.query(Todo).filter(Todo.id == todo_id).first()
+    if not todo:
+        return jsonify({"error": "Task not found"}), 404
+    data = request.json
+    todo.completed = data.get("completed", todo.completed)
+    session.commit()
+    session.close()
+    return jsonify({"id": todo.id, "title": todo.title, "completed": todo.completed})
 
-@app.route("/api/todos/<int:task_id>", methods=["DELETE"])
-def delete_todo(task_id):
-    global tasks
-    tasks = [task for task in tasks if task["id"] != task_id]
+@app.route("/api/todos/<int:todo_id>", methods=["DELETE"])
+def delete_todo(todo_id):
+    session = SessionLocal()
+    todo = session.query(Todo).filter(Todo.id == todo_id).first()
+    if not todo:
+        return jsonify({"error": "Task not found"}), 404
+    session.delete(todo)
+    session.commit()
+    session.close()
     return jsonify({"message": "Task deleted!"})
 
 if __name__ == "__main__":
