@@ -1,6 +1,6 @@
 services:
   backend:
-    image: fajobi13/kubetasks-backend:latest
+    image: fajobi13/kubetasks-backend:v2.0
     ports:
       - "5001:5000"
     depends_on:
@@ -12,7 +12,7 @@ services:
       - kubetasks-network
 
   frontend:
-    image: fajobi13/kubetasks-frontend:latest
+    image: fajobi13/kubetasks-frontend:v2.0
     ports:
       - "3000:3000"
     depends_on:
