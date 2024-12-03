@@ -1,19 +1,44 @@
-version: "3.8"
-
 services:
   backend:
-    build:
-      context: ./backend
+    image: fajobi13/kubetasks-backend:v2.0
     ports:
-      - "5001:5000"  # Map host port 5001 to container port 5000
-    volumes:
-      - ./backend:/app
-    working_dir: /app
-    command: python app.py
+      - "5001:5000"
+    depends_on:
+      - db
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://postgres:password@db:5432/todos
+    networks:
+      - kubetasks-network
 
   frontend:
-    image: nginx:alpine
+    image: fajobi13/kubetasks-frontend:v2.0
     ports:
-      - "8080:80"  # Map host port 8080 to container port 80
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_BASE_URL=http://backend:5001
+    networks:
+      - kubetasks-network
+
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: todos
     volumes:
-      - ./frontend:/usr/share/nginx/html
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - kubetasks-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  kubetasks-network:
+    driver: bridge
