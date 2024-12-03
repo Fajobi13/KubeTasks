@@ -1,27 +1,12 @@
-# backend/Dockerfile
+FROM node:14
 
-FROM python:3.9-slim
-
-# Create a non-root user
-RUN useradd -ms /bin/bash flaskuser
-
-# Set the working directory
 WORKDIR /app
 
-# Copy the backend code
-COPY . /app
+COPY package.json .
+RUN npm install
 
-# Install dependencies
-RUN pip install flask flask-cors
+COPY . .
 
-# Change ownership of the working directory
-RUN chown -R flaskuser:flaskuser /app
+RUN npm run build
 
-# Switch to the non-root user
-USER flaskuser
-
-# Expose port 5000
-EXPOSE 5000
-
-# Command to run the application
-CMD ["python", "app.py"]
+CMD ["npx", "serve", "-s", "build"]

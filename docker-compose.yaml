@@ -1,19 +1,11 @@
-version: "3.8"
-
 services:
   backend:
-    build:
-      context: ./backend
+    build: ./backend
     ports:
-      - "5001:5000"  # Map host port 5001 to container port 5000
-    volumes:
-      - ./backend:/app
-    working_dir: /app
-    command: python app.py
-
+      - "5001:5000"  # Map to port 5001 instead of 5000
   frontend:
-    image: nginx:alpine
+    build: ./frontend
     ports:
-      - "8080:80"  # Map host port 8080 to container port 80
-    volumes:
-      - ./frontend:/usr/share/nginx/html
+      - "3001:3000"  # Avoid conflicts with port 3000
+    depends_on:
+      - backend
