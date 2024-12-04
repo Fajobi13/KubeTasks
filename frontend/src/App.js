@@ -4,7 +4,7 @@ import AddTodo from "./components/AddTodo";
 import TodoList from "./components/TodoList";
 
 // Use environment variable or default to localhost:5000
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
 
 const App = () => {
   const [todos, setTodos] = useState([]);

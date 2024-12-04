@@ -4,4 +4,4 @@ metadata:
   name: app-config
 data:
   DATABASE_URL: "postgresql://postgres:password@db:5432/todos"
-  REACT_APP_API_BASE_URL: "http://backend:5000"
+  REACT_APP_API_BASE_URL: "http://backend:5001"
