@@ -59,7 +59,7 @@ jobs:
         run: |
           echo "${{ secrets.KUBECONFIG }}" > kubeconfig
           export KUBECONFIG=$(pwd)/kubeconfig
-          kubectl apply -f backend-deployment.yaml
-          kubectl apply -f frontend-deployment.yaml
+          kubectl apply -f ./backend/backend-deployment.yaml
+          kubectl apply -f ./frontend/frontend-deployment.yaml
 
 
