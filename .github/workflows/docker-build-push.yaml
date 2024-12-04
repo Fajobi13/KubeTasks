@@ -3,7 +3,7 @@ name: Python Tests and Deployment
 on:
   push:
     branches:
-      - main
+      - aces
 
 jobs:
   test-and-deploy:
