@@ -2,7 +2,7 @@ services:
   backend:
     image: fajobi13/kubetasks-backend:v2.0
     ports:
-      - "5001:5000"
+      - "5000:5000"
     depends_on:
       - db
     environment:
