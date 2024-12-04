@@ -3,7 +3,7 @@ name: Kubernetes Deployment
 on:
   push:
     branches:
-      - main
+      - aces
 
 jobs:
   deploy:
