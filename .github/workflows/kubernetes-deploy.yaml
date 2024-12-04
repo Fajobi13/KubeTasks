@@ -1,0 +1,32 @@
+name: Kubernetes Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Authenticate with Kubernetes
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > kubeconfig
+          export KUBECONFIG=$(pwd)/kubeconfig
+
+      - name: Deploy Backend
+        run: kubectl apply -f backend-deployment.yaml
+
+      - name: Deploy Frontend
+        run: kubectl apply -f frontend-deployment.yaml
