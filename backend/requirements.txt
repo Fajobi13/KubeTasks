@@ -2,5 +2,3 @@ flask
 flask-cors
 psycopg2-binary
 sqlalchemy
-flask-sqlalchemy
-pytest
