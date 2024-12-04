@@ -73,5 +73,5 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig
         run: |
-          kubectl apply -f ./backend/backend-deployment.yaml --validate=false
-          kubectl apply -f ./frontend/frontend-deployment.yaml --validate=false
+          kubectl apply -f ./k8s/backend-deployment.yaml --validate=false
+          kubectl apply -f ./k8s/frontend-deployment.yaml --validate=false
